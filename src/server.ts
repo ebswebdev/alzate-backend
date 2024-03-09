@@ -9,6 +9,8 @@ import jwt from "jsonwebtoken";
 import userRouter from "./router/user.router";
 import { dbConnect } from './configs/database.config';
 import radicadoRouter from './router/radicado.router';
+import procesoradicadoRouter from './router/procesoradicado.router';
+
 
 dbConnect();
 
@@ -22,6 +24,7 @@ app.use(
 
 app.use('/api/users/',userRouter)
 app.use('/api/radicados/',radicadoRouter)
+app.use('/api/procesosr/',procesoradicadoRouter)
 
 const port = 5000;
 app.listen(port, () => {

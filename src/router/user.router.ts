@@ -28,14 +28,14 @@ router.use(bodyParser.json());
 router.get(
   "/",
   asyncHandler(async (req, res) => {
-    const users = await UserModel.find({rol: "usuario"});
+    const users = (await UserModel.find({rol: "usuario"})).reverse();
     res.send(users);
   })
 );
 router.get(
     "/abogados",
     asyncHandler(async (req, res) => {
-      const users = await UserModel.find({rol: "abogado"});
+      const users = (await UserModel.find({rol: "abogado"})).reverse();
       res.send(users);
     })
   );

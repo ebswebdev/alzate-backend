@@ -1,10 +1,7 @@
-import express, { Router } from "express";
-import cors from "cors";
+import { Router } from "express";
 const bodyParser = require("body-parser");
-import jwt from "jsonwebtoken";
-import { radicados, sample_users, usuarios } from "../data";
+import { radicados } from "../data";
 import asyncHandler from "express-async-handler";
-import bcrypt from 'bcryptjs';
 import { Radicado, RadicadoModel } from "../models/radicado.model";
 
 const router = Router();
@@ -36,7 +33,7 @@ router.get(
   "/:userId",
   asyncHandler(async (req, res) => {
     const searchRegex = new RegExp(req.params.userId);
-    const radicado = await RadicadoModel.find({ usuario: { $regex: searchRegex } });
+    const radicado = (await RadicadoModel.find({ usuario: { $regex: searchRegex } })).reverse();
     res.send(radicado);
   })
 );
