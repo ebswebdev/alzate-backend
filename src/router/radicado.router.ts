@@ -55,7 +55,7 @@ router.post(
     const { numero,demanda,demandado,usuario, estado} = req.body;
     const radicado = await RadicadoModel.findOne({ numero });
     if (radicado) {
-      res.status(400).send("Radicado is already exist");
+      res.status(400).send("el radicado ya existe");
       return;
     }
     const newRadicado: Radicado = {
