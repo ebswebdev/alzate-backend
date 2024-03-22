@@ -72,4 +72,45 @@ router.post(
 );
 
 
+router.put(
+  "/edit/:numeroR",
+  asyncHandler(async (req, res) => {
+    const searchRegex = new RegExp(req.params.numeroR);
+  const { demanda, demandado} = req.body;
+
+    const radicado = await RadicadoModel.findOne({ numero: { $regex: searchRegex } });
+    if (!radicado) {
+      res.status(404).send("Radicado no encontrado");
+      return;
+    }
+
+    radicado.demanda = demanda,
+    radicado.demandado = demandado,    
+
+    await radicado.save();
+
+    res.send("El radicado se actualizó correctamente");
+  })
+);
+
+
+router.put(
+  "/estado/:numeroR",
+  asyncHandler(async (req, res) => {
+    const searchRegex = new RegExp(req.params.numeroR);
+  const { estado } = req.body;
+    const radicado = await RadicadoModel.findOne({ numero: { $regex: searchRegex } });
+    if (!radicado) {
+      res.status(404).send("Radicado no encontrado");
+      return;
+    }
+    radicado.estado = estado;    
+
+    await radicado.save();
+
+    res.send("El radicado se actualizó correctamente");
+  })
+);
+
+
 export default router;
