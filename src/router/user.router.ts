@@ -53,17 +53,27 @@ router.post(
   "/login",
   asyncHandler(async (req, res) => {
     const { correo, contrasena } = req.body;
-    const user = await UserModel.findOne({ correo, contrasena });
+    const user = await UserModel.findOne({ correo });
+    console.log("user", user?.contrasena, contrasena);
+
+    
+    
     if (user) {
-      if (user.isAdmin) {
-        res.send(generateTokenReponse(user));
-      } else {
-        const UNAUTHORIZED_REQUEST = 401;
-        res.status(UNAUTHORIZED_REQUEST).send("401 No tiene permisos de login");
+      const match = await bcrypt.compare(contrasena, user?.contrasena);
+      console.log("match", match, user.contrasena);
+      if (match){
+        if (user.isAdmin) {
+          res.send(generateTokenReponse(user));
+        } else {
+          const UNAUTHORIZED_REQUEST = 403;
+          res.status(UNAUTHORIZED_REQUEST).send("403 acceso denegado");
+        }
+      }else{
+        res.status(401).send("401 contraseña incorrecta!");
       }
     } else {
-      const BAD_REQUEST = 400;
-      res.status(BAD_REQUEST).send("400 contraseña o correo incorrecto!");
+      const BAD_REQUEST = 401;
+      res.status(BAD_REQUEST).send("401 correo incorrecto!");
     }
   })
 );
@@ -96,6 +106,53 @@ router.post(
     res.send(generateTokenReponse(dbUser));
   })
 );
+
+
+router.put(
+  "/edit/:userId",
+  asyncHandler(async (req, res) => {
+    const searchRegex = new RegExp(req.params.userId);
+    const { nombre, correo, direccion, telefono, abogado, rol } = req.body;
+
+    // Buscar el usuario por su ID
+    const user = await UserModel.findOne({ cedula: { $regex: searchRegex } });
+    if (!user) {
+      res.status(404).send("User not found");
+      return;
+    }
+
+    // Actualizar los campos del usuario
+    user.nombre = nombre;
+    user.correo = correo.toLowerCase();
+    user.direccion = direccion;
+    user.telefono = telefono;
+    user.abogado = abogado;
+    user.rol = rol;
+
+    // Guardar los cambios en la base de datos
+    await user.save();
+
+    res.send("Usuario actualizado correctamente");
+  })
+);
+
+
+router.delete(
+  "/delete/:userId",
+  asyncHandler(async (req, res) => {
+    const searchRegex = new RegExp(req.params.userId);
+
+    // Buscar el usuario por su ID
+    const user = await UserModel.findOneAndDelete({ cedula: { $regex: searchRegex } });
+    if (!user) {
+      res.status(404).send("User not found");
+      return;
+    }
+    res.send("Usuario eliminado correctamente");
+  })
+);
+
+
 
 const generateTokenReponse = (user: User) => {
   const token = jwt.sign(
