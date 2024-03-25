@@ -145,7 +145,7 @@ router.delete(
     // Buscar el usuario por su ID
     const user = await UserModel.findOneAndDelete({ cedula: { $regex: searchRegex } });
     if (!user) {
-      res.status(404).send("User not found");
+      res.status(404).send("Usuario no encontrado");
       return;
     }
     res.send("Usuario eliminado correctamente");

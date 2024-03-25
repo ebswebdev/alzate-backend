@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 import asyncHandler from "express-async-handler";
 import { ProcesoR, ProcesoRModel } from "../models/proceso-radicado.model";
 import { RadicadoModel } from "../models/radicado.model";
+import { usuarios } from "../data";
 
 const router = Router();
 
@@ -27,33 +28,14 @@ router.get(
   })
 );
 
-/*
 router.get(
-  "/usuario/:userId",
+  "/usuario/:usuarioId",
   asyncHandler(async (req, res) => {
-    const searchRegex = new RegExp(req.params.userId);
-    const radicado = (await RadicadoModel.find({ usuario: { $regex: searchRegex } })).reverse();
-    
-    try {
-      const procesosPromises = radicado.map(async (r) => {
-        const searchRe = new RegExp(r.numero);
-        console.log(r.numero);
-        return await ProcesoRModel.find({ radicado: { $regex: searchRe } });
-      });
-      console.log(procesosPromises);
-      
-      const procesos = await Promise.all(procesosPromises);
-      const mergedProcesos = procesos.reduce((acc, curr) => acc.concat(curr), []);
-      
-      console.log("data", mergedProcesos);
-      res.send(mergedProcesos);
-    } catch (error) {
-      console.error("Error:", error);
-      res.status(500).send("Error interno del servidor");
-    }
+    const searchRegex = new RegExp(req.params.usuarioId);
+    const proceso = (await ProcesoRModel.find({ usuario: { $regex: searchRegex } })).reverse();
+    res.send(proceso);
   })
 );
-*/
 
 
 
@@ -61,18 +43,37 @@ router.get(
 router.post(
   "/agregar",
   asyncHandler(async (req, res) => {
-    const { fecha, observaciones, radicado} = req.body;
+    const { fecha, observaciones, radicado, usuario} = req.body;
 
     const newProcesoR: ProcesoR = {
       fecha: fecha,
       observaciones: observaciones,
-      radicado: radicado
+      radicado: radicado,
+      usuario: usuario
     };
 
     const dbProcesoR = await ProcesoRModel.create(newProcesoR);
     res.send(dbProcesoR.radicado);
   })
 );
+
+router.delete(
+  "/delete/:usuario/:radicado",
+  asyncHandler(async (req, res) => {
+    const usuarioRegex = new RegExp(req.params.usuario);
+    const radicadoRegex = new RegExp(req.params.radicado);
+        
+    const proceso = await ProcesoRModel.findOneAndDelete({ usuario: usuarioRegex, radicado: radicadoRegex });
+    if (!proceso) {
+      res.status(404).send("Proceso no encontrado");
+      return;
+    }
+    res.send("Proceso eliminado correctamente");
+  })
+);
+
+
+
 
 
 export default router;
